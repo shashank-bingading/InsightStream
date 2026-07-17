@@ -2,7 +2,7 @@ import torch
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
-from transformers import AutoTokenizer, AutoModelForSequenceClassification,AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSequenceClassification,AutoModelForSeq2SeqLM,AutoModel
 
 ml_models={}
 
@@ -20,6 +20,11 @@ async def lifespan(app:FastAPI):
     notes_model_name = "google/flan-t5-base"
     ml_models["notes_tokenizer"] = AutoTokenizer.from_pretrained(notes_model_name)
     ml_models["notes_model"] = AutoModelForSeq2SeqLM.from_pretrained(notes_model_name)
+
+    print("Loading Embeddng Model (all-MiniLM-L6-v2)...")
+    embedding_model_name = "sentence-transformers/all-MiniLM-L6-v2"
+    ml_models["embed_tokenizer"] = AutoTokenizer.from_pretrained(embedding_model_name)
+    ml_models["embed_model"] = AutoModel.from_pretrained(embedding_model_name)
 
     print("All Models ready!")
     yield
@@ -100,14 +105,14 @@ async def generate_notes(payload:ArticleInput):
     inputs = tokenizer(
         prompt,
         return_tensors="pt",
-        max_lenght=1024,
+        max_length=1024,
         truncation= True
     )
 
     #generating the response
     with torch.no_grad():
         output_ids = model.generate(
-            inputs["inputs_ids"],
+            inputs["input_ids"],
             max_length = 200,
             num_beams=4,
             length_penalty=1.0,
@@ -126,4 +131,40 @@ async def generate_notes(payload:ArticleInput):
     return {
         "raw_text":notes_raw,
         "bullet_points":notes_lists
+    }
+
+@app.post("/generate-embeddings")
+async def generate_embeddings(payload: ArticleInput):
+    text = payload.text
+
+    tokenizer = ml_models["embed_tokenizer"]
+    model = ml_models["embed_model"]
+
+    inputs = tokenizer(
+        text,
+        return_tensors = "pt",
+        padding = True,
+        truncation = True,
+        max_length = 512
+    )
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    #for the final input from the hidden layer
+    token_embeddings = outputs.last_hidden_state
+    attention_mask = inputs["attention_mask"]
+
+    #adding a whole dimesion here
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+
+    sum_embeddings = torch.sum(token_embeddings * input_mask_expanded,1)
+
+    sum_mask = torch.clamp(input_mask_expanded.sum(1),min=1e-9)
+
+    mean_pooled_vector = (sum_embeddings/ sum_mask).flatten().tolist()
+
+    return {
+        "dimensions": len(mean_pooled_vector),
+        "embeddings": mean_pooled_vector
     }
