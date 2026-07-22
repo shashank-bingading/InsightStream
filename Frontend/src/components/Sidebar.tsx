@@ -7,10 +7,10 @@ const Sidebar = ({}) => {
       </h2>
       <nav className='space-y-3 mt-8'>
         <a href="
-        " className='block py-2 px-4 bg-main-bg  text-text-secondary hover:text-text-primary'>DASHBOARD</a>
+        " className='block py-2 px-4 bg-main-bg  text-text-primary  rounded-md'>DASHBOARD</a>
 
         <a href="
-        " className=" block px-4 py-2 text-text-secondary bg-main-bg hover:text-text-primary">HISTORY</a>
+        " className=" block px-4 py-2 text-text-secondary  hover:text-text-primary rounded-md">HISTORY</a>
       </nav>
     </aside>
   )
