@@ -3,6 +3,7 @@ import {useState} from 'react'
 import Sidebar from './components/Sidebar'
 import DataInputZone from './components/DataInputZone';
 import ModelControlPanel from './components/ModelControlPanel';
+import StreamOutputBoard from './components/StreamOutputBoard';
 
 function App() {
   const [inputText,setInputText] = useState("");
@@ -37,7 +38,12 @@ function App() {
     onProcess={handleProcess}
     isProcessing={isProcessing}
     isDisabled={!inputText.trim()}/>
-
+    <StreamOutputBoard
+    hasProcessed={hasProcessed}
+    isProcessing={isProcessing}
+    sentiment = {sentiment}
+    summarise={summarise}
+    inputText={inputText}/>
     </main>
     </div>
   )
