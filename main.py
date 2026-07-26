@@ -3,6 +3,9 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSequenceClassification,AutoModelForSeq2SeqLM,AutoModel
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 ml_models={}
 
@@ -34,6 +37,15 @@ async def lifespan(app:FastAPI):
 
 #application Instance Initialization
 app = FastAPI(lifespan=lifespan)
+
+#CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials = True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ArticleInput(BaseModel):
     text:str
@@ -80,7 +92,7 @@ async def analyze_article(payload: ArticleInput):
         "sentiment":sentiment,
         "confidence":round(confidence,4),
         "scores":{
-            "positives":round(positive_score,4),
+            "positive":round(positive_score,4),
             "negative":round(negative_score,4)
         }
     }
@@ -122,10 +134,12 @@ async def generate_notes(payload:ArticleInput):
     #decoding the output tokens
     notes_raw = tokenizer.decode(output_ids[0],skip_special_tokens=True)
 
+    items = notes_raw.split("\n") if "\n" in notes_raw else notes_raw.split(".")
+
     notes_lists = [
-        item.strip("*.-").strip()
-        for item in notes_raw.split(".")
-        if len(item.strip())>5
+    item.strip("*.- 0123456789").strip()
+    for item in items
+    if len(item.strip()) > 5
     ]
 
     return {
