@@ -2,7 +2,7 @@ import type {Response,NextFunction} from "express";
 import type { AuthenticatedRequest } from "../middleware/auth.middleware.js"
 import { scrapeArticle } from "../services/scrapper.service.js";
 import {generateSummary} from "../services/ai.service.js"
-import { pool } from "../config/db.js";
+import { createArticleInDB,getArticlesByUserId } from "../models/article.model.js";
 
 //validation checks first
 export const createArticle = async (
@@ -29,23 +29,17 @@ export const createArticle = async (
         const scrapedData = await scrapeArticle(url);
         //passsing this scraped text to generate summary
         const SummaryOutput = await generateSummary(scrapedData.content);
-        
-        const insertQuery = `INSERT INTO articles (user_id, url, title, summary, key_takeaways, read_time_minutes)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING *;
-      `;
 
-      const values = [
+      const newArticle = await createArticleInDB(
         user_id,
-        url,
-        scrapedData.title,
-        SummaryOutput.summary,
-        JSON.stringify(SummaryOutput.keyTakeaways),
-        SummaryOutput.readTimeMinutes,
-      ]
-
-      const result = await pool.query(insertQuery,values);
-      const newArticle = result.rows[0];
+        {
+        title:scrapedData.title,
+        content:scrapedData.content,
+        summary:SummaryOutput.summary,
+        keyTakeaways:JSON.stringify(SummaryOutput.keyTakeaways),
+        readTimeMinutes:SummaryOutput.readTimeMinutes,
+        sourceUrl:url,
+      });
       
       res.status(201).json({
         status:"success",
@@ -73,19 +67,14 @@ export const getUserArticles = async(
             throw error;
         }
 
-        const findQuery = `
-        SELECT id, url, title, summary, key_takeaways, read_time_minutes, created_at
-      FROM articles
-      WHERE user_id = $1
-      ORDER BY created_at DESC;`;
 
-      const result = await pool.query(findQuery,[user_id]);
+      const result = await getArticlesByUserId(user_id);
 
       res.status(200).json({
         status:"success",
-        results: result.rowCount,
+        results: result.length,
         data:{
-            articles:result.rows,
+            articles:result,
         },
       });
     } catch (error) {

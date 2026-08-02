@@ -6,6 +6,8 @@ interface Article{
     title:string,
     content:string,
     summary?:string|null,
+    keyTakeaways?:string|null,
+    readTimeMinutes?:number|null,
     sourceUrl?:string|null,
     createdAt:Date,
     updatedAt: Date
@@ -16,6 +18,8 @@ interface CreateArticleDTO{
     title:string,
     content:string,
     summary?:string,
+    keyTakeaways?:string|null,
+    readTimeMinutes?:number|null,
     sourceUrl?:string
 }
 
@@ -28,6 +32,8 @@ export const createArticleTable = async()=>{
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             summary TEXT,
+            key_takeaways TEXT,
+            read_time_minutes INT,
             source_url TEXT,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)`);
@@ -40,25 +46,27 @@ export const createArticleTable = async()=>{
     }
 }
 
-export const createArticle = async(
+export const createArticleInDB = async(
     userId:string,
     data:CreateArticleDTO
 ):Promise <Article> =>{
     try {
-        const {title,content,summary=null,sourceUrl=null} = data;
+        const {title,content,summary=null,keyTakeaways = null, readTimeMinutes = null,sourceUrl=null} = data;
         const result = await pool.query(
-            `INSERT INTO articles (user_id, title, content, summary, source_url)
-       VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO articles (user_id, title, content, summary,key_takeaways, read_time_minutes, source_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING 
          id, 
          user_id AS "userId", 
          title, 
          content, 
          summary, 
+         key_takeaways AS "keyTakeaways",
+         read_time_minutes AS "readTimeMinutes",
          source_url AS "sourceUrl", 
          created_at AS "createdAt", 
          updated_at AS "updatedAt"`,
-      [userId, title, content, summary, sourceUrl]
+      [userId, title, content, summary,keyTakeaways,readTimeMinutes, sourceUrl]
         );
         return result.rows[0];
     } catch (error) {
@@ -78,6 +86,8 @@ export const getArticlesByUserId = async(
          title, 
          content, 
          summary, 
+         key_takeaways AS "keyTakeaways", 
+         read_time_minutes AS "readTimeMinutes",
          source_url AS "sourceUrl", 
          created_at AS "createdAt", 
          updated_at AS "updatedAt"
@@ -105,6 +115,8 @@ export const getArticleById = async (
          title, 
          content, 
          summary, 
+         key_takeaways AS "keyTakeaways", 
+         read_time_minutes AS "readTimeMinutes",
          source_url AS "sourceUrl", 
          created_at AS "createdAt", 
          updated_at AS "updatedAt"
