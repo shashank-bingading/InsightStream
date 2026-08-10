@@ -6,13 +6,13 @@ import ModelControlPanel from './components/ModelControlPanel';
 import StreamOutputBoard from './components/StreamOutputBoard';
 
 function App() {
-  const [inputText,setInputText] = useState("");
-  const [sentiment,setSentiment] = useState(true);
-  const [summarise,setSummarise] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [hasProcessed, setHasProcessed] = useState(false);
+  const [inputText,setInputText] = useState<string>("");
+  const [sentiment,setSentiment] = useState<boolean>(true);
+  const [summarise,setSummarise] = useState<boolean>(true);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [hasProcessed, setHasProcessed] = useState<boolean>(false);
 
-  const handleProcess = () => {
+  const handleProcess = ():void => {
     if(!inputText.trim()) return;
 
     setIsProcessing(true);

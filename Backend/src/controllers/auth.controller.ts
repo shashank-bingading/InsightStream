@@ -5,7 +5,6 @@ import type { Response, NextFunction } from "express";
 import type { Jwtpayload } from "../middleware/auth.middleware.js";
 import { createUser, findUserByEmail } from "../models/user.model.js";
 
-//have to clear redundant code in this file and the other controller file
 export const RegisterUser = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -13,7 +12,6 @@ export const RegisterUser = async (
 ): Promise<void> => {
   try {
     const { email, password } = req.body;
-    //can I use email = req.body.email here?
     if (!email || !password) {
       const error: any = new Error("Email or password missing");
       error.statusCode = 400;
