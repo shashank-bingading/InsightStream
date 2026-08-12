@@ -15,7 +15,10 @@ interface AuthContextType{
   isAuthenticated:boolean;
 }
 
+//creating context here
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+//authProvider component 
 
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children})=>{
   const [token,setToken] = useState<string | null>(()=>
@@ -27,8 +30,11 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children})=
   });
 
   const login = (newToken: string,newUser: User)=>{
+
+    //setting user and token , this will update the components using these values
     setToken(newToken);
     setUser(newUser);
+    //saving to local storage so it won't be lost
     localStorage.setItem("token",newToken);
     localStorage.setItem("user",JSON.stringify(newUser));
   };

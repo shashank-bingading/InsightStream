@@ -4,14 +4,23 @@ import Sidebar from './components/Sidebar'
 import DataInputZone from './components/DataInputZone';
 import ModelControlPanel from './components/ModelControlPanel';
 import StreamOutputBoard from './components/StreamOutputBoard';
+import { AuthProvider, useAuth } from './components/AuthContext';
+import Auth from './components/Auth';
 
-function App() {
+function MainApp() {
   const [inputText,setInputText] = useState<string>("");
   const [sentiment,setSentiment] = useState<boolean>(true);
   const [summarise,setSummarise] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [hasProcessed, setHasProcessed] = useState<boolean>(false);
+  const {isAuthenticated} = useAuth();
 
+  //if user not logged in
+  if(!isAuthenticated){
+    return (
+      <Auth/>
+    )
+  }
   const handleProcess = ():void => {
     if(!inputText.trim()) return;
 
@@ -49,4 +58,10 @@ function App() {
   )
 }
 
-export default App
+export default function App(){
+  return(
+    <AuthProvider>
+      <MainApp/>
+    </AuthProvider>
+  )
+}
