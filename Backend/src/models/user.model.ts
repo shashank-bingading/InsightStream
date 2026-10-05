@@ -72,21 +72,3 @@ export async function createUser (email:string,passwordHash:string): Promise<Omi
   }
 }
 
-export const findUserById = async(id:string):Promise<Omit<User,"passwordHash">|null> => {
-  try {
-    const result = await pool.query(
-      `SELECT 
-        id, 
-        email, 
-        created_at AS "createdAt", 
-        updated_at AS "updatedAt" 
-      FROM users 
-      WHERE id = $1`,
-      [id]
-    );
-    return result.rows[0] || null;
-  } catch (error) {
-    console.error("Error finding user by ID:", error);
-    throw error;
-  }
-}

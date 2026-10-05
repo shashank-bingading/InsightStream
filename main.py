@@ -5,8 +5,6 @@ from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSequenceClassification,AutoModelForSeq2SeqLM,AutoModel
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
 ml_models={}
 
 @asynccontextmanager

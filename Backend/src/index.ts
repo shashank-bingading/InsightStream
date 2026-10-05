@@ -1,10 +1,12 @@
-import cors from "cors"
 import dotenv from "dotenv"
+import cors from "cors"
 import express from "express";
-import type {Request,Response,Application} from 'express'
+import type {Response,Application} from 'express'
 import authRouter from "./routes/auth.routes.js";
 import articlesRouter from "./routes/article.routes.js";
 import connectDB from "./config/db.js";
+import { createUserTable } from "./models/user.model.js";
+import { createArticleTable } from "./models/article.model.js";
 
 dotenv.config();
 
@@ -31,7 +33,6 @@ app.use(
       status: "error",
       message,
     });
-
     }
 )
 
@@ -40,7 +41,10 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = async():Promise<void>=>{
     // await testDbConnection();
-    connectDB();
+    await connectDB();
+    //creating tables
+    await createUserTable();
+    await createArticleTable();
     app.listen(PORT,()=>{
     console.log(`Server is running on Port ${PORT}`);
 })
