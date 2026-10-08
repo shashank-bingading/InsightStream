@@ -7,7 +7,6 @@ const router = Router();
 //middleware for all routes
 router.use(authenticateToken);
 
-
 router.post("/",createArticle);
 
 router.get("/",getUserArticles);

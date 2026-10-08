@@ -1,7 +1,7 @@
 import type {Response,NextFunction} from "express";
 import type { AuthenticatedRequest } from "../middleware/auth.middleware.js"
 import { scrapeArticle } from "../services/scrapper.service.js";
-import {generateSummary} from "../services/ai.service.js"
+import {generateSentiment, generateSummary} from "../services/ai.service.js"
 import { createArticleInDB,getArticlesByUserId } from "../models/article.model.js";
 
 //validation checks first
@@ -29,6 +29,8 @@ export const createArticle = async (
         const scrapedData = await scrapeArticle(url);
         //passsing this scraped text to generate summary
         const SummaryOutput = await generateSummary(scrapedData.content);
+        //passing this scraped text for sentiment analysis
+        const sentimentOutput = await generateSentiment(scrapedData.content);
 
       const newArticle = await createArticleInDB(
         user_id,
@@ -36,6 +38,8 @@ export const createArticle = async (
         title:scrapedData.title,
         content:scrapedData.content,
         summary:SummaryOutput.summary,
+        sentiment:sentimentOutput.sentiment,
+        sentimentConfidence: sentimentOutput.confidenceScore,
         keyTakeaways:JSON.stringify(SummaryOutput.keyTakeaways),
         readTimeMinutes:SummaryOutput.readTimeMinutes,
         sourceUrl:url,

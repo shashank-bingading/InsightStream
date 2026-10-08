@@ -82,7 +82,7 @@ async def analyze_article(payload: ArticleInput):
     positive_score = probabilities[1]
 
     #Structuring output JSON
-    sentiment = "POSITIVE" if positive_score>negative_score else "NEGATIVE"
+    sentiment = "positive" if positive_score>negative_score else "negative"
 
     confidence = max(positive_score,negative_score)
 
@@ -110,6 +110,7 @@ async def generate_notes(payload:ArticleInput):
         "and present them as a clean, structured list of bullet points:\n\n"
         f"Text: {text}"
     )
+
 
     #2. Convert prompt to numbers (Tensors)
     inputs = tokenizer(
@@ -145,6 +146,7 @@ async def generate_notes(payload:ArticleInput):
         "bullet_points":notes_lists
     }
 
+#For features going to be added in future
 @app.post("/generate-embeddings")
 async def generate_embeddings(payload: ArticleInput):
     text = payload.text

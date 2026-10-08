@@ -6,6 +6,8 @@ interface Article{
     title:string,
     content:string,
     summary?:string|null,
+    sentiment?:string|null,
+    sentimentConfidence?:number|null,
     keyTakeaways?:string|null,
     readTimeMinutes?:number|null,
     sourceUrl?:string|null,
@@ -18,6 +20,8 @@ interface CreateArticleDTO{
     title:string,
     content:string,
     summary?:string,
+    sentiment?:string,
+    sentimentConfidence?:number | null,
     keyTakeaways?:string|null,
     readTimeMinutes?:number|null,
     sourceUrl?:string
@@ -32,6 +36,8 @@ export const createArticleTable = async()=>{
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             summary TEXT,
+            sentiment TEXT,
+            sentiment_confidence FLOAT,
             key_takeaways TEXT,
             read_time_minutes INT,
             source_url TEXT,
@@ -51,22 +57,24 @@ export const createArticleInDB = async(
     data:CreateArticleDTO
 ):Promise <Article> =>{
     try {
-        const {title,content,summary=null,keyTakeaways = null, readTimeMinutes = null,sourceUrl=null} = data;
+        const {title,content,summary=null,sentiment =null,sentimentConfidence = null,keyTakeaways = null, readTimeMinutes = null,sourceUrl=null} = data;
         const result = await pool.query(
-            `INSERT INTO articles (user_id, title, content, summary,key_takeaways, read_time_minutes, source_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `INSERT INTO articles (user_id, title, content, summary,sentiment,sentiment_confidence,key_takeaways, read_time_minutes, source_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING 
          id, 
          user_id AS "userId", 
          title, 
          content, 
-         summary, 
+         summary,
+         sentiment,
+         sentiment_confidence, 
          key_takeaways AS "keyTakeaways",
          read_time_minutes AS "readTimeMinutes",
          source_url AS "sourceUrl", 
          created_at AS "createdAt", 
          updated_at AS "updatedAt"`,
-      [userId, title, content, summary,keyTakeaways,readTimeMinutes, sourceUrl]
+      [userId, title, content, summary,sentiment,sentimentConfidence,keyTakeaways,readTimeMinutes, sourceUrl]
         );
         return result.rows[0];
     } catch (error) {
@@ -85,7 +93,9 @@ export const getArticlesByUserId = async(
          user_id AS "userId", 
          title, 
          content, 
-         summary, 
+         summary,
+         sentiment,
+         sentiment_confidence, 
          key_takeaways AS "keyTakeaways", 
          read_time_minutes AS "readTimeMinutes",
          source_url AS "sourceUrl", 
