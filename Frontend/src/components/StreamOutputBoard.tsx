@@ -1,12 +1,21 @@
+interface Article {
+  title: string;
+  summary: string;
+  sentiment: "positive" | "negative";
+  sentimentConfidence: number;
+  keyTakeaways: string; // JSON string
+  readTimeMinutes: number;
+}
+
 interface StreamOutputBoardProps {
     hasProcessed:boolean;
     isProcessing:boolean;
     sentiment:boolean;
     summarise:boolean;
-    inputText:string;
+    article:Article | null;
 }
 
-const StreamOutputBoard = ({hasProcessed,isProcessing,sentiment,summarise,inputText}:StreamOutputBoardProps) => {
+const StreamOutputBoard = ({hasProcessed,isProcessing,sentiment,summarise,article}:StreamOutputBoardProps) => {
   return (
     <div className="mt-8">
       {!hasProcessed && !isProcessing ? (
@@ -28,7 +37,7 @@ const StreamOutputBoard = ({hasProcessed,isProcessing,sentiment,summarise,inputT
                             Sentiment Analysis
                             </h3>
                             <span className="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-medium border border-emerald-500/20">
-                            Positive
+                            {sentiment}
                             </span>
                         </div>
                         <p className="text-sm text-text-primary leading-relaxed mb-4">

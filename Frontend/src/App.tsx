@@ -6,13 +6,19 @@ import ModelControlPanel from './components/ModelControlPanel';
 import StreamOutputBoard from './components/StreamOutputBoard';
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Auth from './components/Auth';
+import API from './api/api';
 
 function MainApp() {
   const [inputText,setInputText] = useState<string>("");
   const [sentiment,setSentiment] = useState<boolean>(true);
+  const [takeaways,setTakeaways] = useState<string[]>([]);
   const [summarise,setSummarise] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [hasProcessed, setHasProcessed] = useState<boolean>(false);
+  const [sentimentConfidence,setSentimentConfidence] = useState<number>(0);
+  const [readTime, setReadTime] = useState<number>(0);
+
+
   const {isAuthenticated} = useAuth();
 
   //if user not logged in
@@ -21,15 +27,30 @@ function MainApp() {
       <Auth/>
     )
   }
-  const handleProcess = ():void => {
+  const handleProcess = async():Promise<void> => {
     if(!inputText.trim()) return;
 
     setIsProcessing(true);
-    setTimeout(()=>{
-      setIsProcessing(false);
+    
+    try {
+      const res = await API.post("/",{url:inputText});
+
+      const a = res.data.data.article;
+
+      //setting states
+      setSummarise(a.summary);
+      setTakeaways(JSON.parse(a.keyTakeways || "[]"));
+      setSentiment(a.sentiment);
+      setSentimentConfidence(a.sentimentConfidence);
+      setReadTime(a.readTimeMinutes);
       setHasProcessed(true);
 
-    },1200)
+    } catch (error) {
+      console.error(error);
+    }
+    finally{
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -52,7 +73,8 @@ function MainApp() {
     isProcessing={isProcessing}
     sentiment = {sentiment}
     summarise={summarise}
-    inputText={inputText}/>
+    article={article}
+    />
     </main>
     </div>
   )
