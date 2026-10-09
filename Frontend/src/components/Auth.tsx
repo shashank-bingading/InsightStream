@@ -5,9 +5,12 @@ import type { User } from './AuthContext'
 import API from '../api/api'
 
 interface AuthResponse {
-    token:string;
-    user:User;
-    message?:string;
+    status: string;
+  token: string;
+  data: {
+    user: User;
+  };
+  message?: string;
 }
 
 export const Auth: React.FC = ()=>{
@@ -33,7 +36,8 @@ export const Auth: React.FC = ()=>{
                     email,password
                 }
             );
-            const {token,user} = result.data;
+            const token = result.data.token;
+            const user = result.data.data.user;
             login(token,user);
         } catch (error:unknown) {
             if(axios.isAxiosError(error)){

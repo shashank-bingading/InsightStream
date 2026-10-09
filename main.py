@@ -106,9 +106,8 @@ async def generate_notes(payload:ArticleInput):
     #1:master prompt
 
     prompt = (
-        "Identify the 5 most important key takeaways from this text "
-        "and present them as a clean, structured list of bullet points:\n\n"
-        f"Text: {text}"
+         "Summarize the following article in 4-5 sentences:\n\n"
+        f"{text}"
     )
 
 
@@ -123,10 +122,12 @@ async def generate_notes(payload:ArticleInput):
     #generating the response
     with torch.no_grad():
         output_ids = model.generate(
-            inputs["input_ids"],
-            max_length = 200,
+            **inputs,
+            max_new_tokens = 200,
+            min_new_tokens=60,
             num_beams=4,
-            length_penalty=1.0,
+            length_penalty=2.0,
+            no_repeat_ngram_size=3,
             early_stopping=True
         )
     

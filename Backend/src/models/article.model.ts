@@ -48,7 +48,6 @@ export const createArticleTable = async()=>{
     } catch (error) {
         console.error(`Error in creating/verfying article table: ${error}`);
         throw error
-        
     }
 }
 

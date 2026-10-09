@@ -8,9 +8,6 @@ const Sidebar = ({}) => {
       <nav className='space-y-3 mt-8'>
         <a href="
         " className='block py-2 px-4 bg-main-bg  text-text-primary  rounded-md'>DASHBOARD</a>
-
-        <a href="
-        " className=" block px-4 py-2 text-text-secondary  hover:text-text-primary rounded-md">HISTORY</a>
       </nav>
     </aside>
   )

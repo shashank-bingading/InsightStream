@@ -8,16 +8,22 @@ import { AuthProvider, useAuth } from './components/AuthContext';
 import Auth from './components/Auth';
 import API from './api/api';
 
+export interface Article{
+  title: string;
+  summary: string;
+  sentiment: "positive" | "negative";
+  sentimentConfidence: number;
+  keyTakeaways: string;
+  readTimeMinutes: number;
+}
 function MainApp() {
+
   const [inputText,setInputText] = useState<string>("");
   const [sentiment,setSentiment] = useState<boolean>(true);
-  const [takeaways,setTakeaways] = useState<string[]>([]);
   const [summarise,setSummarise] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [hasProcessed, setHasProcessed] = useState<boolean>(false);
-  const [sentimentConfidence,setSentimentConfidence] = useState<number>(0);
-  const [readTime, setReadTime] = useState<number>(0);
-
+  const [article,setArticle] = useState<Article | null>(null);
 
   const {isAuthenticated} = useAuth();
 
@@ -29,20 +35,15 @@ function MainApp() {
   }
   const handleProcess = async():Promise<void> => {
     if(!inputText.trim()) return;
-
     setIsProcessing(true);
     
     try {
-      const res = await API.post("/",{url:inputText});
+      const res = await API.post("/articles",{url:inputText});
 
       const a = res.data.data.article;
 
       //setting states
-      setSummarise(a.summary);
-      setTakeaways(JSON.parse(a.keyTakeways || "[]"));
-      setSentiment(a.sentiment);
-      setSentimentConfidence(a.sentimentConfidence);
-      setReadTime(a.readTimeMinutes);
+      setArticle(a);
       setHasProcessed(true);
 
     } catch (error) {

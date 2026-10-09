@@ -26,11 +26,13 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children})=
   )
   const [user,setUser] = useState<User | null>(()=>{
     const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    return savedUser && savedUser!=="undefined" ? JSON.parse(savedUser) : null;
   });
 
   const login = (newToken: string,newUser: User)=>{
-
+    if(!newToken || !newUser){
+      return console.error("user aur auth token not found");
+    }
     //setting user and token , this will update the components using these values
     setToken(newToken);
     setUser(newUser);
