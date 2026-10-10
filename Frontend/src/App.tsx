@@ -7,8 +7,11 @@ import StreamOutputBoard from './components/StreamOutputBoard';
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Auth from './components/Auth';
 import API from './api/api';
+import AuthComponent from './components/AuthContext';
+
 
 export interface Article{
+  id: string;
   title: string;
   summary: string;
   sentiment: "positive" | "negative";
@@ -24,6 +27,7 @@ function MainApp() {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [hasProcessed, setHasProcessed] = useState<boolean>(false);
   const [article,setArticle] = useState<Article | null>(null);
+  const [historyVersion, setHistoryVersion] = useState(0);
 
   const {isAuthenticated} = useAuth();
 
@@ -45,6 +49,7 @@ function MainApp() {
       //setting states
       setArticle(a);
       setHasProcessed(true);
+      setHistoryVersion((v) => v + 1);
 
     } catch (error) {
       console.error(error);
@@ -53,10 +58,16 @@ function MainApp() {
       setIsProcessing(false);
     }
   };
+  const handleSelect = (a: Article) => {
+  setArticle(a);
+  setHasProcessed(true);
+};
 
   return (
     <div className='min-h-screen bg-main-bg text-text-primary flex'>
-    <Sidebar/>
+    <Sidebar
+     onSelect={handleSelect}
+     refreshKey={historyVersion}/>
     <main className='flex-1 p-10 max-w-5xl mx-auto'>
     <DataInputZone
     inputText={inputText}

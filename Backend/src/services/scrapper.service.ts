@@ -63,8 +63,15 @@ export const scrapeArticle = async (url: string): Promise<ScrappedArticle> => {
         paragraphs.push(text);
       }
     });
+    //removing citation numbers
+    const cleanText = (text: string): string =>
+  text
+    .replace(/\[\d+\]/g, "")            
+    .replace(/\[(citation needed|edit)\]/gi, "")
+    .replace(/\s+/g, " ")               
+    .trim();
 
-    const content = paragraphs.join("\n\n");
+    const content = cleanText(paragraphs.join("\n\n"));
 
     if (!content) {
       throw new Error("Could not extract readable article text from this URL.");

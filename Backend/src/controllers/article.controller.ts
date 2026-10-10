@@ -70,8 +70,7 @@ export const getUserArticles = async(
             error.statusCode = 401;
             throw error;
         }
-
-
+        
       const result = await getArticlesByUserId(user_id);
 
       res.status(200).json({

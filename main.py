@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
@@ -148,15 +149,17 @@ async def generate_notes(payload:ArticleInput):
     }
 
 #For features going to be added in future
+class BatchInput(BaseModel):
+    texts:list[str]
+
 @app.post("/generate-embeddings")
-async def generate_embeddings(payload: ArticleInput):
-    text = payload.text
+async def generate_embeddings(payload: BatchInput):
 
     tokenizer = ml_models["embed_tokenizer"]
     model = ml_models["embed_model"]
 
     inputs = tokenizer(
-        text,
+        payload.texts,
         return_tensors = "pt",
         padding = True,
         truncation = True,
@@ -177,9 +180,10 @@ async def generate_embeddings(payload: ArticleInput):
 
     sum_mask = torch.clamp(input_mask_expanded.sum(1),min=1e-9)
 
-    mean_pooled_vector = (sum_embeddings/ sum_mask).flatten().tolist()
+    mean_pooled = (sum_embeddings/ sum_mask)
+    mean_pooled = F.normalize(mean_pooled,p=2,dim=1)
 
     return {
-        "dimensions": len(mean_pooled_vector),
-        "embeddings": mean_pooled_vector
+        "dimensions": mean_pooled.shape[1],
+        "embeddings": mean_pooled.tolist()
     }
