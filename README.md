@@ -43,7 +43,7 @@ flowchart LR
 
 ## Detailed Architecture
 
-[![System Architecture](./docs/Architecture.png)](./docs/Architecture.png)
+[![System Architecture](./docs/Architecture.svg)](./docs/Architecture.svg)
 
 **Request flow:**
 
